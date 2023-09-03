@@ -1,9 +1,10 @@
 import {
     DivisionByZero,
     convertFloatToFraction,
-    cycleLen, cycleStart,
-    isParseData, newFraction,
-    parseNumber, simplify
+    isParseData,
+    newFraction,
+    parseNumber,
+    simplify
 } from "./fraction.helper.js";
 import { logger } from "./logger.js";
 
@@ -29,13 +30,15 @@ export default class Fraction {
             this.denominator = param1.denominator;
             this.sign = param1.sign;
         } else if (isParseData(param1)) {
+            logger.debug('Construct by object.');
             this.numerator = param1.numerator;
             this.denominator = param1.denominator;
             this.sign = param1.sign !== undefined ? param1.sign : 1;
+            logger.debug('result', this);
         } else if (typeof param1 === "number") {
             this.numerator = param1;
             this.denominator = param2 ? param2 : 1;
-            this.sign = 1;
+            this.sign = (this.numerator / this.denominator) >= 0 ? 1 : -1;
         } else if (typeof param1 === "string") {
             if (param1.includes("/")) {
                 const [v1, v2] = param1.split("/");
@@ -61,6 +64,7 @@ export default class Fraction {
             this.denominator = typeof v2 === "string" ? parseNumber(v2) : v2;
             this.sign = 1;
         } else {
+            logger.debug('I got here somehow...');
             this.numerator = 0;
             this.denominator = 1;
             this.sign = 1;
@@ -75,11 +79,38 @@ export default class Fraction {
      *
      * Ex: new Fraction({n: 2, d: 3}).add("14.9") => 467 / 30
      **/
-    add(a: number | string | [number, number], b?: number) {
-        const P = new Fraction(a, b);
-        return newFraction(
-            this.sign * this.numerator * P.denominator + P.sign * this.denominator * P.numerator,
-            this.denominator * P.denominator);
+    add(a: number | string, b?: number) {
+        const nf = new Fraction(a, b);
+        if (nf.sign < 0) {
+            logger.debug('Forward to sub()');
+            return this.sub(nf.numerator, nf.denominator);
+        }
+        // const newSign = this.sign * nf.sign;
+        let partN1 = 0;
+        let partN2 = 0;
+        if (this.sign < 0) {
+            partN1 = -(this.numerator * nf.denominator);
+        } else {
+            partN1 = (this.numerator * nf.denominator);
+        }
+        if (nf.sign < 0) {
+            partN2 = -(nf.numerator * this.denominator);
+        } else {
+            partN2 = (nf.numerator * this.denominator);
+        }
+        const newN = partN1 + partN2;
+        const newSign = newN < 0 ? -1 : 1;
+        const newD = this.denominator * nf.denominator;
+        logger.debug('done add.');
+        const answer = new Fraction({
+            numerator: Math.abs(newN),
+            denominator: Math.abs(newD),
+            sign: newSign
+        });
+        return answer;
+        // return newFraction(
+        //     this.sign * this.numerator * nf.denominator + nf.sign * this.denominator * nf.numerator,
+        //     this.denominator * nf.denominator);
     }
 
     /**
@@ -88,11 +119,33 @@ export default class Fraction {
     * Ex: new Fraction({n: 2, d: 3}).sub("14.9") => -427 / 30
     **/
     sub(a: number | string, b?: number) {
-        const P = new Fraction(a, b);
-        return newFraction(
-            this.sign * this.numerator * P.denominator - P.sign * this.denominator * P.numerator,
-            this.denominator * P.denominator
-        );
+        const nf = new Fraction(a, b);
+        let partN1 = 0;
+        let partN2 = 0;
+        if (this.sign < 0) {
+            partN1 = -(this.numerator * nf.denominator);
+        } else {
+            partN1 = (this.numerator * nf.denominator);
+        }
+        if (nf.sign < 0) {
+            partN2 = -(nf.numerator * this.denominator);
+        } else {
+            partN2 = (nf.numerator * this.denominator);
+        }
+        logger.debug(`${partN1} - ${partN2}`);
+
+        const newN = partN1 - partN2;
+        const newD = this.denominator * nf.denominator;
+        logger.debug(newD);
+        const newSign = (newN * newD) < 0 ? -1 : 1;
+
+        logger.debug('done subtract.');
+        const answer = new Fraction({
+            numerator: Math.abs(newN),  // must not have sig
+            denominator: Math.abs(newD),  // must not have sig
+            sign: newSign
+        });
+        return answer;
     }
 
     /**
@@ -128,8 +181,10 @@ export default class Fraction {
        *
        * Ex: new Fraction("100.'91823'").toString() => "100.(91823)"
        **/
-    public toString(dec: number): string {
-        logger.debug('calling toString(dec: number)');
+    public toString(decimalPlace?: number): string {
+        logger.debug('calling toString()', this);
+        decimalPlace = decimalPlace ? decimalPlace : 15;
+        // decimalPlace++;
         let N = this.numerator;
         let D = this.denominator;
 
@@ -137,42 +192,69 @@ export default class Fraction {
             return "NaN";
         }
 
-        dec = dec || 15; // 15 = decimal places when no repetation
+        let str = (
+            (this.sign < 0 ? "-" : "") +
+            ((N / D))
+        );
+        logger.debug('original str =', str);
+        logger.debug('str.length =', str.length);
 
-        let cycLen = cycleLen(N, D); // Cycle length
-        let cycOff = cycleStart(N, D, cycLen); // Cycle start
-
-        let str: string = this.sign < 0 ? "-" : "";
-
-        str += ("" + ((N / D) | 0));
-        N %= D;
-        N *= 10;
-
-        if (N)
-            str += ".";
-
-        if (cycLen) {
-
-            for (let i = cycOff; i--;) {
-                str += N / D | 0;
-                N %= D;
-                N *= 10;
+        const parts = str.split('.');
+        if (parts.length > 1) {
+            if (parts[1].length > decimalPlace) {
+                str = ('' + parseFloat(str).toFixed(decimalPlace + 2));
+                str = str.substring(0, str.length - 2);  // hack. doant want to round the decimal point to detect Irrational Numbers later.
+                logger.debug('trimmed str =', str);
+                logger.debug('str.length =', str.length);
             }
-            str += "(";
-            for (let i = cycLen; i--;) {
-                str += N / D | 0;
-                N %= D;
-                N *= 10;
-            }
-            str += ")";
         } else {
-            for (let i = dec; N && i--;) {
-                str += N / D | 0;
-                N %= D;
-                N *= 10;
+            logger.debug('no decimal point');
+            return str;
+        }
+
+        const matches = str.matchAll(/(\d+?)\1+/gm);
+
+        let group = '';
+        let repeat = '';
+        let beginIndex = -1;
+        for (const match of matches) {
+            logger.debug('>', match);
+            group = match[0];
+            repeat = match[1];
+            beginIndex = match.index;
+        }
+        if (beginIndex >= 0) {
+
+            logger.debug('str.length =', str.length);
+            logger.debug('group =', group);
+            logger.debug('repeat =', repeat);
+            logger.debug('str.lastIndexOf(repeat) =', str.lastIndexOf(repeat));
+            logger.debug('str.lastIndexOf(group) =', str.lastIndexOf(group));
+            logger.debug('is repeat till the end =', str.lastIndexOf(group) + group.length);
+
+            let doFormat = false;
+            if (repeat.length === 1) {
+                if ((str.lastIndexOf(group) + group.length) === str.length) {
+                    doFormat = true;
+                }
+            } else {
+                const arr = str.split(repeat);
+                let lastItem = arr[arr.length - 1];
+                lastItem = lastItem.substring(0, lastItem.length - 1);
+                if (repeat.startsWith(lastItem)) {
+                    doFormat = true;
+                }
+            }
+
+            if (doFormat) {
+                const head = str.substring(0, beginIndex);
+                const result = repeat === '0' ? head : `${head}(${repeat})`;
+                logger.debug('result = ' + result);
+                return result;
             }
         }
         return str;
+
     };
 
 }

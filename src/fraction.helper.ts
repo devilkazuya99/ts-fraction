@@ -37,27 +37,26 @@ export const gcd = (a: number, b: number) => {
     }
 };
 
+export const multiplyBy10 = (x: number): number => {
+    let sx = `${x}`;
+    const pattern = /\./g;
+    const matches = pattern.exec(sx);
+    if (matches) {
+        const naked = sx.replace(pattern, ''); // remove the dot
+        const head = naked.substring(0, matches.index + 1);
+        const tail = naked.substring(matches.index + 1);
+        sx = `${head}.${tail}`;
+    }
+    return parseFloat(sx);
+};
+
 export const convertFloatToFraction = (f: number) => {
     logger.debug('convert Float To Fraction for: ', f);
     let af = Math.abs(f);
     let n = 0;
 
-    function shiftDecimalPoint(x: number): number {
-        let sx = `${x}`;
-        const pattern = /\./g;
-        const matches = pattern.exec(sx);
-        if (matches) {
-            const naked = sx.replace(pattern, ''); // remove the dot
-            const head = naked.substring(0, matches.index + 1);
-            const tail = naked.substring(matches.index + 1);
-            sx = `${head}.${tail}`;
-        }
-
-        return parseFloat(sx);
-    }
-
     while (af % 1 != 0 && n < MAX_CYCLE_LEN) {
-        af = shiftDecimalPoint(af);
+        af = multiplyBy10(af);
         n++;
     }
     return simplify(new Fraction({
@@ -83,9 +82,11 @@ export type ParseData = {
 };
 
 export const isParseData = (x: unknown): x is ParseData => {
-    const hasN = !!x['numerator'] && !isNaN(x['numerator']);
-    const hasD = !!x['denominator'] && !isNaN(x['denominator']);
-    const hasS = !!x['sign'] && !isNaN(x['sign']);
+    logger.debug('Calling isParseData:', x);
+    const data = <ParseData>x;
+    const hasN = data.hasOwnProperty('numerator');
+    const hasD = data.hasOwnProperty('denominator');
+    // const hasS = data.hasOwnProperty('sign');
     const r = (hasN && hasD);
     // logger.debug('ParseData = ', x, ' isParseData() = ', (r));
     return r;
@@ -287,6 +288,7 @@ export const newFraction = (n: number, d: number): Fraction => {
     return new Fraction({ numerator: _n, denominator: _d, sign: _s });
 };
 
+/** @deprecated */
 export const cycleLen = (n: number, d: number) => {
 
     for (; d % 2 === 0;
@@ -317,6 +319,7 @@ export const cycleLen = (n: number, d: number) => {
     return t;
 };
 
+/** @deprecated */
 export const cycleStart = (n: number, d: number, len: number) => {
 
     let rem1 = 1;

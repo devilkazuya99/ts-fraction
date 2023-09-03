@@ -10,14 +10,21 @@ describe('Fraction', () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);
                 console.log(`>>> `, testData);
                 const { set, set2, param, fn, expectError } = { ...testData };
-                const expected = testData.expect;
+                const expected = testData.expect as string;
                 let fraction: Fraction;
                 if (set2) {
                     fraction = new Fraction(set, set2);
                 } else {
                     fraction = new Fraction(testData.set);
                 }
-                const result = (<Fraction>fraction[fn](param)).toString(15);
+                const parts = expected.split('.');
+                let d: number | undefined;
+                if (parts.length > 1) {
+                    if (parts[1].length > 15) {
+                        d = parts[1].length;
+                    }
+                }
+                const result = (<Fraction>fraction[fn](param)).toString(d);
                 expect(result).toEqual(expected as string);
             });
         });
@@ -26,19 +33,19 @@ describe('Fraction', () => {
     it('construct Fraction({ n: 3, d: 6 })', () => {
         const frc = new Fraction({ numerator: 3, denominator: 6 });
         expect(frc).toBeTruthy();
-        logger.debug('Fraction.toString() = ' + frc.toString(2));
+        logger.debug('Fraction.toString() = ' + frc.toString());
     });
 
     it('construct Fraction(4, 5)', () => {
         const frc = new Fraction(4, 5);
         expect(frc).toBeTruthy();
-        logger.debug('Fraction.toString() = ' + frc.toString(3));
+        logger.debug('Fraction.toString() = ' + frc.toString());
     });
 
     it('construct Fraction(\'3/4\')', () => {
         const frc = new Fraction('3/4');
         expect(frc).toBeTruthy();
-        logger.debug('Fraction.toString() = ' + frc.toString(4));
+        logger.debug('Fraction.toString() = ' + frc.toString());
     });
 
     it('add', () => {
@@ -59,7 +66,7 @@ describe('Fraction', () => {
         const frc = new Fraction(1)['sub']("2");
         expect(frc).toBeTruthy();
         logger.debug('Fraction.sub() = ', frc);
-        logger.debug(frc.toString(2));
+        logger.debug(frc.toString());
         // expect(frc).toEqual(jasmine.objectContaining({ n: 467, s: 1, d: 30 }));
     });
 
@@ -93,7 +100,7 @@ describe('Fraction', () => {
 
     it('div', () => {
         const frc = new Fraction("30/7").div(2);
-        logger.debug('div:Fraction = ', frc, frc.toString(9));
+        logger.debug('div:Fraction = ', frc, frc.toString());
     });
 
 });

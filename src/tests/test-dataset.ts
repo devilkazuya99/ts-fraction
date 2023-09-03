@@ -1,5 +1,5 @@
-import { DivisionByZero, InvalidParameter, NonIntegerParameter } from "./fraction.helper.js";
-import { FractionParam } from "./fraction.js";
+import { DivisionByZero, InvalidParameter, NonIntegerParameter } from "../fraction.helper.js";
+import { FractionParam } from "../fraction.js";
 
 export interface TestData {
     label?: string;

@@ -11,20 +11,15 @@ const logger = {
     }
 };
 
-export const DivisionByZero = () => {
-    return new Error("Division by Zero");
-};
-
-export const InvalidParameter = () => {
-    return new Error("Invalid argument");
-};
-
-export const NonIntegerParameter = () => {
-    return new Error("Parameters must be integer");
-};
-
+export const DivisionByZero = () => new Error("Division by Zero");
+export const InvalidParameter = () => new Error("Invalid argument");
+export const NonIntegerParameter = () => new Error("Parameters must be integer");
 
 export const parseNumber = (s: string) => {
+    if (s.match(/\(\d+\)/g)) {
+        // can not parse irrational numbers, like: 0.(3) = 0.333333333333333333...
+        throw InvalidParameter();
+    }
     // console.log('parsing number:', s);
     let cs = s.replace(/[^0-9\.-]/g, '');
     // console.log('besore parsing number:', cs);

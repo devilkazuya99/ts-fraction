@@ -60,30 +60,31 @@ export const convertFloatToFraction = (f: number) => {
     }
     console.log('what is f: ', f);
     return simplify(new Fraction({
-        n: vf,
-        d: Math.pow(10, n),
-        s: f < 0 ? -1 : 1
+        numerator: vf,
+        denominator: Math.pow(10, n),
+        sign: f < 0 ? -1 : 1
     }));
 };
 
 export const simplify = (frc: Fraction) => {
-    const c = gcd(frc.n, frc.d);
+    const c = gcd(frc.numerator, frc.denominator);
     return new Fraction({
-        n: frc.n / c,
-        d: frc.d / c,
-        s: frc.s
+        numerator: frc.numerator / c,
+        denominator: frc.denominator / c,
+        sign: frc.sign
     });
 };
 
 export type ParseData = {
-    n: number,
-    d: number,
-    s?: number,
+    numerator: number,
+    denominator: number,
+    sign?: number,
 };
+
 export const isParseData = (x: unknown): x is ParseData => {
-    const hasN = !!x['n'] && !isNaN(x['n']);
-    const hasD = !!x['d'] && !isNaN(x['d']);
-    const hasS = !!x['s'] && !isNaN(x['s']);
+    const hasN = !!x['numerator'] && !isNaN(x['numerator']);
+    const hasD = !!x['denominator'] && !isNaN(x['denominator']);
+    const hasS = !!x['sign'] && !isNaN(x['sign']);
     const r = (hasN && hasD);
     logger.debug('ParseData = ', x, ' isParseData() = ', (r));
     return r;
@@ -122,10 +123,10 @@ const parse = (p1: number | number[] | string | ParseData, p2?: number): ParseDa
     } else
         // switch (typeof p1) {
         if (isParseData(p1)) {
-            if (p1.d && p1.n) {
-                n = p1.n;
-                d = p1.d;
-                if (p1.s) { n *= p1.s; }
+            if (p1.denominator && p1.numerator) {
+                n = p1.numerator;
+                d = p1.denominator;
+                if (p1.sign) { n *= p1.sign; }
             } else {
                 throw InvalidParameter();
             }
@@ -264,9 +265,9 @@ const parse = (p1: number | number[] | string | ParseData, p2?: number): ParseDa
     }
 
     return {
-        s: s < 0 ? -1 : 1,
-        n: Math.abs(n),
-        d: Math.abs(d)
+        sign: s < 0 ? -1 : 1,
+        numerator: Math.abs(n),
+        denominator: Math.abs(d)
     };
 };
 
@@ -281,7 +282,7 @@ export const newFraction = (n: number, d: number): Fraction => {
     const a = gcd(n, d);
     const _n = n / a;
     const _d = d / a;
-    return new Fraction({ n: _n, d: _d, s: _s });
+    return new Fraction({ numerator: _n, denominator: _d, sign: _s });
 };
 
 export const cycleLen = (n: number, d: number) => {

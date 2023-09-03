@@ -20,59 +20,60 @@ export type FractionParam =
     | number
     | [number, number]
     | Fraction
-    | { s?: number; n: number; d: number; }
+    | { numerator: number; denominator: number; sign?: number; }
     | boolean
     | null;
 
 
 export default class Fraction {
-    s: number = 1;
-    n: number;
-    d: number;
+    numerator: number;
+    denominator: number;
+    sign: number = 1;
+
     constructor(param1: FractionParam, param2?: number) {
         logger.debug("constructing new Fraction", param1, param2);
         if (param1 instanceof Fraction) {
-            this.n = param1.n;
-            this.d = param1.d;
-            this.s = param1.s;
+            this.numerator = param1.numerator;
+            this.denominator = param1.denominator;
+            this.sign = param1.sign;
         } else if (isParseData(param1)) {
-            this.n = param1.n;
-            this.d = param1.d;
-            this.s = param1.s !== undefined ? param1.s : 1;
+            this.numerator = param1.numerator;
+            this.denominator = param1.denominator;
+            this.sign = param1.sign !== undefined ? param1.sign : 1;
         } else if (typeof param1 === "number") {
-            this.n = param1;
-            this.d = param2 ? param2 : 1;
-            this.s = 1;
+            this.numerator = param1;
+            this.denominator = param2 ? param2 : 1;
+            this.sign = 1;
         } else if (typeof param1 === "string") {
             if (param1.includes("/")) {
                 const [v1, v2] = param1.split("/");
-                this.n = parseNumber(v1);
-                this.d = parseNumber(v2);
-                this.s = v1.includes('-') ? -1 : 1;
+                this.numerator = parseNumber(v1);
+                this.denominator = parseNumber(v2);
+                this.sign = v1.includes('-') ? -1 : 1;
             } else {
                 logger.debug('use this route.');
                 let f: Fraction;
                 if (param2 == undefined) {
                     f = convertFloatToFraction(parseNumber(param1));
                 } else {
-                    f = simplify(new Fraction({ n: parseNumber(param1), d: param2 }));
+                    f = simplify(new Fraction({ numerator: parseNumber(param1), denominator: param2 }));
                 }
-                this.n = f.n;
-                this.d = f.d;
-                this.s = f.s;
+                this.numerator = f.numerator;
+                this.denominator = f.denominator;
+                this.sign = f.sign;
             }
         } else if (Array.isArray(param1)) {
             const v1 = param1[0];
             const v2 = param1[1];
-            this.n = typeof v1 === "string" ? parseNumber(v1) : v1;
-            this.d = typeof v2 === "string" ? parseNumber(v2) : v2;
-            this.s = 1;
+            this.numerator = typeof v1 === "string" ? parseNumber(v1) : v1;
+            this.denominator = typeof v2 === "string" ? parseNumber(v2) : v2;
+            this.sign = 1;
         } else {
-            this.n = 0;
-            this.d = 1;
-            this.s = 1;
+            this.numerator = 0;
+            this.denominator = 1;
+            this.sign = 1;
         }
-        if (this.d === 0) {
+        if (this.denominator === 0) {
             throw DivisionByZero();
         }
     }
@@ -85,8 +86,8 @@ export default class Fraction {
     add(a: number | string | [number, number], b?: number) {
         const P = new Fraction(a, b);
         return newFraction(
-            this.s * this.n * P.d + P.s * this.d * P.n,
-            this.d * P.d);
+            this.sign * this.numerator * P.denominator + P.sign * this.denominator * P.numerator,
+            this.denominator * P.denominator);
     }
 
     /**
@@ -97,8 +98,8 @@ export default class Fraction {
     sub(a: number | string, b?: number) {
         const P = new Fraction(a, b);
         return newFraction(
-            this.s * this.n * P.d - P.s * this.d * P.n,
-            this.d * P.d
+            this.sign * this.numerator * P.denominator - P.sign * this.denominator * P.numerator,
+            this.denominator * P.denominator
         );
     }
 
@@ -112,8 +113,8 @@ export default class Fraction {
         logger.debug('this = ', this);
         logger.debug('mul:p = ', P);
         return newFraction(
-            this.s * P.s * this.n * P.n,
-            this.d * P.d
+            this.sign * P.sign * this.numerator * P.numerator,
+            this.denominator * P.denominator
         );
     }
 
@@ -125,8 +126,8 @@ export default class Fraction {
     div(a: number | string | Fraction, b?: number) {
         const P = new Fraction(a, b);
         return newFraction(
-            this.s * P.s * this.n * P.d,
-            this.d * P.n
+            this.sign * P.sign * this.numerator * P.denominator,
+            this.denominator * P.numerator
         );
     }
 
@@ -137,8 +138,8 @@ export default class Fraction {
        **/
     public toString(dec: number): string {
         logger.debug('calling toString(dec: number)');
-        let N = this.n;
-        let D = this.d;
+        let N = this.numerator;
+        let D = this.denominator;
 
         if (isNaN(N) || isNaN(D)) {
             return "NaN";
@@ -149,7 +150,7 @@ export default class Fraction {
         let cycLen = cycleLen(N, D); // Cycle length
         let cycOff = cycleStart(N, D, cycLen); // Cycle start
 
-        let str: string = this.s < 0 ? "-" : "";
+        let str: string = this.sign < 0 ? "-" : "";
 
         str += ("" + ((N / D) | 0));
         N %= D;

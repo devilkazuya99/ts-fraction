@@ -4,7 +4,7 @@ import { FractionParam } from "../fraction.js";
 export interface TestData {
     label?: string;
     set: FractionParam;
-    set2?: FractionParam;
+    set2?: number;
     fn?: string;
     param?: FractionParam;
     expect?: string | number;

@@ -5,15 +5,7 @@ import {
     isParseData, newFraction,
     parseNumber, simplify
 } from "./fraction.helper.js";
-
-const enableDebug = false;
-const logger = {
-    debug: (...o) => {
-        if (enableDebug) {
-            console.log(o);
-        }
-    }
-};
+import { logger } from "./logger.js";
 
 export type FractionParam =
     | string

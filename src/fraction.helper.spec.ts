@@ -1,5 +1,6 @@
 import { assign, convertFloatToFraction, gcd, isParseData } from "./fraction.helper.js";
 import Fraction from "./fraction.js";
+import { logger } from "./logger.js";
 
 describe('fraction.helper', () => {
 
@@ -24,13 +25,13 @@ describe('fraction.helper', () => {
 
     it('convertFloatToFraction', () => {
         const frc = convertFloatToFraction(3.142);
-        console.log(frc);
+        logger.debug(frc);
         expect(frc).toEqual(jasmine.objectContaining({ sign: 1, numerator: 1571, denominator: 500 }));
     });
 
     it('convertFloatToFraction', () => {
         const frc = convertFloatToFraction(-17.345);
-        console.log(frc);
+        logger.debug(frc);
         expect(frc).toEqual(jasmine.objectContaining({ sign: -1, numerator: 3469, denominator: 200 }));
     });
 

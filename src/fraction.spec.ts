@@ -1,15 +1,24 @@
 import Fraction from "./fraction.js";
+import { logger } from "./logger.js";
 import { TestsDataset } from "./tests/test-dataset.js";
-
-const enableDebug = true;
-const logger = { debug: (_m?, ...o) => enableDebug ? console.log : undefined };
 
 describe('Fraction', () => {
 
     ['add'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
-            it(`Testing '${fnName}' function.`, () => {
-                logger.debug(`>>> `, testData);
+            fit(`Testing '${fnName}': ${testData.label}.`, () => {
+                logger.debug(`Testing '${fnName}': ${testData.label}.`);
+                console.log(`>>> `, testData);
+                const { set, set2, param, fn, expectError } = { ...testData };
+                const expected = testData.expect;
+                let fraction: Fraction;
+                if (set2) {
+                    fraction = new Fraction(set, set2);
+                } else {
+                    fraction = new Fraction(testData.set);
+                }
+                const result = (<Fraction>fraction[fn](param)).toString(15);
+                expect(result).toEqual(expected as string);
             });
         });
     });

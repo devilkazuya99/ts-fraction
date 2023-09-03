@@ -13,8 +13,8 @@ TODO: Functions to be completed
 
 -   Fraction abs() `TODO`
 -   Fraction neg() `TODO`
--   Fraction add(n) `TODO`
--   Fraction sub(n) `TODO`
+-   Fraction add(n) ✅
+-   Fraction sub(n) `2b tested`
 -   Fraction mul(n) `TODO`
 -   Fraction div(n) `TODO`
 -   Fraction pow(exp) `TODO`
@@ -31,7 +31,7 @@ TODO: Functions to be completed
 -   int compare(n) `TODO`
 -   boolean divisible(n) `TODO`
 -   double valueOf() `TODO`
--   String toString([decimalPlaces=15]) `TODO`
+-   String toString([decimalPlaces=15]) ✅
 -   String toLatex(excludeWhole=false) `TODO`
 -   String toFraction(excludeWhole=false) `TODO`
 -   Array toContinued() `TODO`

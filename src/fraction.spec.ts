@@ -5,14 +5,14 @@ describe('Fraction', () => {
 
     ['add'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
-            fit(`Testing '${fnName}' function.`, () => {
+            it(`Testing '${fnName}' function.`, () => {
                 console.log(`>>> `, testData);
             });
         });
     });
 
     it('construct Fraction({ n: 3, d: 6 })', () => {
-        const frc = new Fraction({ n: 3, d: 6 });
+        const frc = new Fraction({ numerator: 3, denominator: 6 });
         expect(frc).toBeTruthy();
         console.log('Fraction.toString() = ' + frc.toString(2));
     });
@@ -30,14 +30,14 @@ describe('Fraction', () => {
     });
 
     it('add', () => {
-        const frc = new Fraction({ n: 2, d: 3 })['add']("14.9");
+        const frc = new Fraction({ numerator: 2, denominator: 3 })['add']("14.9");
         expect(frc).toBeTruthy();
         console.log('Fraction.add() = ', frc);
         expect(frc).toEqual(jasmine.objectContaining({ n: 467, s: 1, d: 30 }));
     });
 
     it('sub', () => {
-        const frc = new Fraction({ n: 2, d: 3 })['sub']("14.9");
+        const frc = new Fraction({ numerator: 2, denominator: 3 })['sub']("14.9");
         expect(frc).toBeTruthy();
         console.log('Fraction.sub() = ', frc);
         // expect(frc).toEqual(jasmine.objectContaining({ n: 467, s: 1, d: 30 }));
@@ -62,7 +62,7 @@ describe('Fraction', () => {
     });
 
     it('sub', () => {
-        const frc = new Fraction({ n: 2, d: 3 })['sub']("14.9");
+        const frc = new Fraction({ numerator: 2, denominator: 3 })['sub']("14.9");
         expect(frc).toBeTruthy();
         console.log('Fraction.sub() = ', frc);
         // expect(frc).toEqual(jasmine.objectContaining({ n: 467, s: 1, d: 30 }));

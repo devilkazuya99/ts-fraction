@@ -332,9 +332,9 @@ export const TestsDataset: TestData[] = [{
 }, {
     label: "-222/3",
     set: {
-        n: 3,
-        d: 222,
-        s: -1
+        numerator: 3,
+        denominator: 222,
+        sign: -1
     },
     fn: "inverse",
     param: null,
@@ -348,8 +348,8 @@ export const TestsDataset: TestData[] = [{
 }, {
     label: "abs(-222/3)",
     set: {
-        n: -222,
-        d: 3
+        numerator: -222,
+        denominator: 3
     },
     fn: "abs",
     param: null,

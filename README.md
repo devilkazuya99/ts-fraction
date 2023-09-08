@@ -15,8 +15,8 @@ TODO: Functions to be completed
 -   Fraction neg() `TODO`
 -   Fraction add(n) ✅
 -   Fraction sub(n) ✅
--   Fraction mul(n) `TODO`
--   Fraction div(n) `TODO`
+-   Fraction mul(n) ✅
+-   Fraction div(n) ✅
 -   Fraction pow(exp) `TODO`
 -   Fraction mod(n) `TODO`
 -   Fraction mod() `TODO`

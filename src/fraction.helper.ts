@@ -101,8 +101,8 @@ export type ParseData = {
 export const isParseData = (x: unknown): x is ParseData => {
     logger.debug('Calling isParseData:', x);
     const data = <ParseData>x;
-    const hasN = data.hasOwnProperty('numerator');
-    const hasD = data.hasOwnProperty('denominator');
+    const hasN = data.hasOwnProperty('numerator') && !!data.numerator;
+    const hasD = data.hasOwnProperty('denominator') && !!data.denominator;
     // const hasS = data.hasOwnProperty('sign');
     const r = (hasN && hasD);
     // logger.debug('ParseData = ', x, ' isParseData() = ', (r));

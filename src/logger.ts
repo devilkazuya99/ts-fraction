@@ -1,5 +1,5 @@
 
-const enableDebug = true;
+const enableDebug = false;
 
 export const logger = {
     debug: (m?, ...o) => {

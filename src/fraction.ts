@@ -183,11 +183,25 @@ export default class Fraction {
      * Ex: new Fraction("-17.(345)").inverse().div(3)
      **/
     div(a: number | string | Fraction, b?: number) {
-        const P = new Fraction(a, b);
-        return newFraction(
-            this.sign * P.sign * this.numerator * P.denominator,
-            this.denominator * P.numerator
-        );
+        const nF = new Fraction(a, b);
+        logger.debug('🍏 this = ', this);
+        logger.debug('🍏 div:p = ', nF);
+        if (nF.numerator === 0) {
+            throw DivisionByZero();
+        }
+        // result N / D = (s1 * s2)[(n1 * n2) / (d1 * d2)]
+        const newN = this.numerator * nF.denominator;
+        const newD = this.denominator * nF.numerator;
+        const newSign = this.sign * nF.sign;
+
+        logger.debug('done divide.');
+        const answer = new Fraction({
+            numerator: Math.abs(newN),  // must not have sig
+            denominator: Math.abs(newD),  // must not have sig
+            sign: newSign
+        });
+        logger.debug('🍏 answer = ', answer);
+        return answer;
     }
 
     /**
@@ -196,7 +210,7 @@ export default class Fraction {
        * Ex: new Fraction("100.'91823'").toString() => "100.(91823)"
        **/
     public toString(decimalPlace?: number): string {
-        logger.debug('calling toString()', this);
+        logger.debug('🚑 calling toString()', this);
         decimalPlace = decimalPlace ? decimalPlace : 15;
         // decimalPlace++;
         let N = this.numerator;
@@ -206,12 +220,13 @@ export default class Fraction {
             return "NaN";
         }
 
+        const divResult = '' + (N / D);
         let str = (
             (this.sign < 0 ? "-" : "") +
-            ((N / D))
+            (divResult.match(/[e]/g) ? (N / D).toFixed(decimalPlace + 2) : (N / D))
         );
-        logger.debug('original str =', str);
-        logger.debug('str.length =', str.length);
+        logger.debug('🚑 original str =', str);
+        logger.debug('🚑 str.length =', str.length);
 
         const parts = str.split('.');
         if (parts.length > 1) {
@@ -219,18 +234,18 @@ export default class Fraction {
             if (decimalPart.length > decimalPlace) {
                 str = ('' + parseFloat(str).toFixed(decimalPlace + 2));
                 str = str.substring(0, str.length - 2);  // hack. doant want to round the decimal point to detect Irrational Numbers later.
-                logger.debug('trimmed str =', str);
-                logger.debug('str.length =', str.length);
+                logger.debug('🚑 trimmed str =', str);
+                logger.debug('🚑 str.length =', str.length);
             } else {
-                logger.debug('Appending decimal point.');
+                logger.debug('🚑 Appending decimal point.');
                 while (decimalPart.length < decimalPlace) {
                     decimalPart += '0';
                 }
-                logger.debug('decimalPart = ', decimalPart);
+                logger.debug('🚑 decimalPart = ', decimalPart);
                 str = parts[0] + '.' + decimalPart;
             }
         } else {
-            logger.debug('no decimal point');
+            logger.debug('🚑 no decimal point');
             return str;
         }
 
@@ -247,12 +262,12 @@ export default class Fraction {
         }
         if (beginIndex >= 0) {
 
-            logger.debug('str.length =', str.length);
-            logger.debug('group =', group);
-            logger.debug('repeat =', repeat);
-            logger.debug('str.lastIndexOf(repeat) =', str.lastIndexOf(repeat));
-            logger.debug('str.lastIndexOf(group) =', str.lastIndexOf(group));
-            logger.debug('is repeat till the end =', str.lastIndexOf(group) + group.length);
+            logger.debug('🥩 str.length =', str.length);
+            logger.debug('🥩 group =', group);
+            logger.debug('🥩 repeat =', repeat);
+            logger.debug('🥩 str.lastIndexOf(repeat) =', str.lastIndexOf(repeat));
+            logger.debug('🥩 str.lastIndexOf(group) =', str.lastIndexOf(group));
+            logger.debug('🥩 is repeat till the end =', str.lastIndexOf(group) + group.length);
 
             let doFormat = false;
             if (repeat.length === 1) {
@@ -270,8 +285,12 @@ export default class Fraction {
 
             if (doFormat) {
                 const head = str.substring(0, beginIndex);
+                logger.debug('🥩 head = ' + head);
                 const result = repeat === '0' ? head : `${head}(${repeat})`;
-                logger.debug('result = ' + result);
+                logger.debug('🥩 result = ' + result);
+                if (result.endsWith('.')) {
+                    return result.replace(/[.]/, '');
+                }
                 return result;
             }
         }

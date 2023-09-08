@@ -4,11 +4,11 @@ import { TestsDataset } from "./tests/test-dataset.js";
 
 describe('Fraction', () => {
 
-    ['add', 'sub', 'mul'].forEach(fnName => {
+    ['add', 'sub', 'mul', 'div'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
             fit(`Testing '${fnName}': ${testData.label}.`, () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);
-                console.log(`>>> `, testData);
+                logger.debug(`>>> `, testData);
                 const { set, set2, param, fn, expectError } = { ...testData };
                 const expected = testData.expect as string;
                 let fraction: Fraction;
@@ -17,15 +17,23 @@ describe('Fraction', () => {
                 } else {
                     fraction = new Fraction(testData.set);
                 }
-                const parts = expected.split('.');
                 let d: number | undefined;
-                if (parts.length > 1) {
-                    if (parts[1].length > 15) {
-                        d = parts[1].length;
+                if (expected) {
+                    const parts = expected.split('.');
+                    if (parts.length > 1) {
+                        if (parts[1].length > 15) {
+                            d = parts[1].length;
+                        }
                     }
                 }
-                const result = (<Fraction>fraction[fn](param)).toString(d);
-                expect(result).toEqual(expected as string);
+
+                try {
+                    const result = (<Fraction>fraction[fn](param)).toString(d);
+                    expect(result).toEqual(expected as string);
+                } catch (error) {
+                    logger.debug('🤢  ', error);
+                    expect(error).toEqual(expectError);
+                }
             });
         });
     });

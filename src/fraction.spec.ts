@@ -6,7 +6,7 @@ describe('Fraction', () => {
 
     ['add', 'sub', 'mul', 'div'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
-            fit(`Testing '${fnName}': ${testData.label}.`, () => {
+            it(`Testing '${fnName}': ${testData.label}.`, () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);
                 logger.debug(`>>> `, testData);
                 const { set, set2, param, fn, expectError } = { ...testData };

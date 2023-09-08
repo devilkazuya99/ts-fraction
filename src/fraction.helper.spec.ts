@@ -1,5 +1,4 @@
 import { assign, convertFloatToFraction, gcd, isParseData } from "./fraction.helper.js";
-import Fraction from "./fraction.js";
 import { logger } from "./logger.js";
 
 describe('fraction.helper', () => {

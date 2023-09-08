@@ -6,8 +6,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc",
-        "pretest": "npm run build",
-        "test": "nyc jasmine"
+        "test": "nyc ts-node node_modules/jasmine/bin/jasmine"
     },
     "keywords": [
         "fraction",

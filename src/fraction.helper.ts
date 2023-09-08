@@ -8,10 +8,27 @@ export const InvalidParameter = () => new Error("Invalid argument");
 export const NonIntegerParameter = () => new Error("Parameters must be integer");
 
 export const parseNumber = (s: string) => {
-    if (s.match(/\(\d+\)/g)) {
+    const matches = s.matchAll(/\(\d+\)/g);
+    for (const match of matches) {
         // can not parse irrational numbers, like: 0.(3) = 0.333333333333333333...
-        throw InvalidParameter();
+        logger.debug('Has (). Starts from ', match.index);
+        logger.debug(match);
+        const repeatN = match[0].replace(/[()]/g, '');
+        logger.debug('repeatN = ' + repeatN);
+
+        const decimalPointIndex = s.indexOf('.');
+        logger.debug('decimalPointIndex = ' + decimalPointIndex);
+        const l = 15 - (match.index - 1 - decimalPointIndex);
+        let r = s.substring(0, match.index);
+        for (let i = 0; i < l; i++) {
+            r += '' + repeatN;
+        }
+        logger.debug('r = ' + r + ` [${r.length}]`);
+        logger.debug('   ' + parseFloat(r));
+        return parseFloat(r);
     }
+
+
     // logger.debug('parsing number:', s);
     let cs = s.replace(/[^0-9\.-]/g, '');
     // logger.debug('besore parsing number:', cs);

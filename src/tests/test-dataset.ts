@@ -1294,8 +1294,8 @@ export const TestsDataset: TestData[] = [{
     param: 0,
     expect: "0.58(3)"
 }, {
-    label: "3.3333333333333",
-    set: 3.3333333333333,
+    label: "3.333333333333333",
+    set: 3.333333333333333,
     fn: "add",
     param: 0,
     expect: "3.(3)"

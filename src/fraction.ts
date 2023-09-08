@@ -159,13 +159,22 @@ export default class Fraction {
      * Ex: new Fraction("-17.(345)").mul(3) => 5776 / 111
      **/
     mul(a: number | string | Fraction, b?: number) {
-        const P = new Fraction(a, b);
-        logger.debug('this = ', this);
-        logger.debug('mul:p = ', P);
-        return newFraction(
-            this.sign * P.sign * this.numerator * P.numerator,
-            this.denominator * P.denominator
-        );
+        const nF = new Fraction(a, b);
+        logger.debug('🍎 this = ', this);
+        logger.debug('🍎 mul:p = ', nF);
+        // result N / D = (s1 * s2)[(n1 * n2) / (d1 * d2)]
+        const newN = this.numerator * nF.numerator;
+        const newD = this.denominator * nF.denominator;
+        const newSign = this.sign * nF.sign;
+
+        logger.debug('done multiply.');
+        const answer = new Fraction({
+            numerator: Math.abs(newN),  // must not have sig
+            denominator: Math.abs(newD),  // must not have sig
+            sign: newSign
+        });
+        logger.debug('🍎 answer = ', answer);
+        return answer;
     }
 
     /**

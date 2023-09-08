@@ -4,7 +4,7 @@ import { TestsDataset } from "./tests/test-dataset.js";
 
 describe('Fraction', () => {
 
-    ['add', 'sub'].forEach(fnName => {
+    ['add', 'sub', 'mul'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
             fit(`Testing '${fnName}': ${testData.label}.`, () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);

@@ -1,6 +1,6 @@
 # ts-fraction
 
-Recreatio of [Fraction.js](https://github.com/rawify/Fraction.js)
+Recreation from original project [Fraction.js](https://github.com/rawify/Fraction.js)
 
 Why:
 
@@ -14,7 +14,7 @@ TODO: Functions to be completed
 -   Fraction abs() `TODO`
 -   Fraction neg() `TODO`
 -   Fraction add(n) ✅
--   Fraction sub(n) `2b tested`
+-   Fraction sub(n) ✅
 -   Fraction mul(n) `TODO`
 -   Fraction div(n) `TODO`
 -   Fraction pow(exp) `TODO`
@@ -45,6 +45,12 @@ Library: `jasmine`
 
 ```
 npm run test
+```
+
+Library: `ts-node`
+
+```
+ts-node-esm test1.ts
 ```
 
 ---

@@ -45,6 +45,11 @@ export default class Fraction {
                 this.numerator = parseNumber(v1);
                 this.denominator = parseNumber(v2);
                 this.sign = v1.includes('-') ? -1 : 1;
+            } else if (param1.includes(":")) {
+                const [v1, v2] = param1.split(":");
+                this.numerator = parseNumber(v1);
+                this.denominator = parseNumber(v2);
+                this.sign = v1.includes('-') ? -1 : 1;
             } else {
                 logger.debug('use this route.');
                 let f: Fraction;
@@ -201,11 +206,19 @@ export default class Fraction {
 
         const parts = str.split('.');
         if (parts.length > 1) {
-            if (parts[1].length > decimalPlace) {
+            let decimalPart = parts[1];
+            if (decimalPart.length > decimalPlace) {
                 str = ('' + parseFloat(str).toFixed(decimalPlace + 2));
                 str = str.substring(0, str.length - 2);  // hack. doant want to round the decimal point to detect Irrational Numbers later.
                 logger.debug('trimmed str =', str);
                 logger.debug('str.length =', str.length);
+            } else {
+                logger.debug('Appending decimal point.');
+                while (decimalPart.length < decimalPlace) {
+                    decimalPart += '0';
+                }
+                logger.debug('decimalPart = ', decimalPart);
+                str = parts[0] + '.' + decimalPart;
             }
         } else {
             logger.debug('no decimal point');

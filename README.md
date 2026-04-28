@@ -4,38 +4,39 @@ Recreation from original project [Fraction.js](https://github.com/rawify/Fractio
 
 Why:
 
--   Try create project that can be package into ES6 module.
--   Self learaning.
+- Try create project that can be package into ES6 module.
+- Self learaning.
 
 ---
 
-TODO: Functions to be completed
+## Implemented Functions
 
--   Fraction abs() `TODO`
--   Fraction neg() `TODO`
--   Fraction add(n) ✅
--   Fraction sub(n) ✅
--   Fraction mul(n) ✅
--   Fraction div(n) ✅
--   Fraction pow(exp) `TODO`
--   Fraction mod(n) `TODO`
--   Fraction mod() `TODO`
--   Fraction gcd(n) `TODO`
--   Fraction lcm(n) `TODO`
--   Fraction ceil([places=0-16]) `TODO`
--   Fraction floor([places=0-16]) `TODO`
--   Fraction round([places=0-16]) `TODO`
--   Fraction inverse() `TODO`
--   Fraction simplify([eps=0.001]) `TODO`
--   boolean equals(n) `TODO`
--   int compare(n) `TODO`
--   boolean divisible(n) `TODO`
--   double valueOf() `TODO`
--   String toString([decimalPlaces=15]) ✅
--   String toLatex(excludeWhole=false) `TODO`
--   String toFraction(excludeWhole=false) `TODO`
--   Array toContinued() `TODO`
--   Fraction clone() `TODO`
+| Function                              | Status |
+| ------------------------------------- | ------ |
+| Fraction abs()                        | ✅     |
+| Fraction neg()                        | ✅     |
+| Fraction add(n)                       | ✅     |
+| Fraction sub(n)                       | ✅     |
+| Fraction mul(n)                       | ✅     |
+| Fraction div(n)                       | ✅     |
+| Fraction pow(exp)                     | ✅     |
+| Fraction mod(n)                       | ✅     |
+| Fraction gcd(n)                       | ✅     |
+| Fraction lcm(n)                       | ✅     |
+| Fraction ceil([places])               | ✅     |
+| Fraction floor([places])              | ✅     |
+| Fraction round([places])              | ✅     |
+| Fraction inverse()                    | ✅     |
+| Fraction simplify([eps])              | ✅     |
+| boolean equals(n)                     | ✅     |
+| int compare(n)                        | ✅     |
+| boolean divisible(n)                  | ✅     |
+| double valueOf()                      | ✅     |
+| String toString([decimalPlaces=15])   | ✅     |
+| String toLatex(excludeWhole=false)    | ✅     |
+| String toFraction(excludeWhole=false) | ✅     |
+| Array toContinued()                   | ✅     |
+| Fraction clone()                      | ✅`    |
 
 ---
 

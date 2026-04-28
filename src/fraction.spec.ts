@@ -4,7 +4,7 @@ import { TestsDataset } from "./tests/test-dataset.js";
 
 describe('Fraction', () => {
 
-    ['add', 'sub', 'mul', 'div'].forEach(fnName => {
+    ['add', 'sub', 'mul', 'div', 'mod', 'pow', 'gcd', 'lcm', 'ceil', 'floor', 'round', 'inverse', 'abs', 'neg', 'equals', 'compare', 'divisible', 'toFraction', 'toLatex', 'toContinued'].forEach(fnName => {
         TestsDataset.filter(testData => testData.fn === fnName).forEach(testData => {
             it(`Testing '${fnName}': ${testData.label}.`, () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);
@@ -28,8 +28,32 @@ describe('Fraction', () => {
                 }
 
                 try {
-                    const result = (<Fraction>fraction[fn](param)).toString(d);
-                    expect(result).toEqual(expected as string);
+                    let result: any;
+                    const method = fraction[fn];
+                    if (fn === 'equals' || fn === 'divisible') {
+                        result = method.call(fraction, param);
+                        expect(String(result)).toEqual(expected as string);
+                    } else if (fn === 'compare') {
+                        result = method.call(fraction, param);
+                        expect(String(result)).toEqual(expected as string);
+                    } else if (fn === 'toContinued') {
+                        result = method.call(fraction);
+                        expect(JSON.stringify(result)).toEqual(expected as string);
+                    } else if (fn === 'valueOf') {
+                        result = method.call(fraction);
+                        expect(String(result)).toEqual(expected as string);
+                    } else if (fn === 'toFraction' || fn === 'toLatex') {
+                        result = method.call(fraction, param);
+                        expect(result).toEqual(expected as string);
+                    } else {
+                        result = method.call(fraction, param);
+                        if (result instanceof Fraction) {
+                            result = result.toString(d);
+                        } else {
+                            result = String(result);
+                        }
+                        expect(result).toEqual(expected as string);
+                    }
                 } catch (error) {
                     logger.debug('🤢  ', error);
                     expect(error).toEqual(expectError);

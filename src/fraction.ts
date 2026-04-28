@@ -1,7 +1,9 @@
 import {
     DivisionByZero,
     convertFloatToFraction,
+    gcd,
     isParseData,
+    lcm,
     newFraction,
     parseNumber,
     simplify
@@ -205,10 +207,331 @@ export default class Fraction {
     }
 
     /**
-       * Creates a string representation of a fraction with all digits
-       *
-       * Ex: new Fraction("100.'91823'").toString() => "100.(91823)"
-       **/
+     * Returns the absolute value of the fraction
+     *
+     * Ex: new Fraction({ numerator: -222, denominator: 3 }).abs() => 74
+     **/
+    abs() {
+        return new Fraction({
+            numerator: this.numerator,
+            denominator: this.denominator,
+            sign: 1
+        });
+    }
+
+    /**
+     * Returns the negated value of the fraction
+     *
+     * Ex: new Fraction("1/3").neg() => -0.(3)
+     **/
+    neg() {
+        return new Fraction({
+            numerator: this.numerator,
+            denominator: this.denominator,
+            sign: -this.sign
+        });
+    }
+
+    /**
+     * Returns the inverse (reciprocal) of the fraction
+     *
+     * Ex: new Fraction("2/7").inverse() => 3.5
+     **/
+    inverse() {
+        if (this.numerator === 0) {
+            throw DivisionByZero();
+        }
+        return new Fraction({
+            numerator: this.denominator,
+            denominator: this.numerator,
+            sign: this.sign
+        });
+    }
+
+    /**
+     * Returns the result of a^b (power)
+     *
+     * Ex: new Fraction(27).pow("2/3") => 9
+     **/
+    pow(exp: number | string | Fraction) {
+        const nF = new Fraction(exp);
+
+        if (this.numerator === 0 && nF.numerator === 0) {
+            return new Fraction(1); // 0^0 = 1
+        }
+
+        if (nF.denominator === 1) {
+            // Integer exponent
+            const result = Math.pow(this.sign * this.numerator / this.denominator, nF.sign * nF.numerator);
+            if (Number.isInteger(result)) {
+                return new Fraction(result);
+            }
+            // For integer exponents, compute exactly
+            const newN = Math.pow(this.numerator, nF.numerator);
+            const newD = Math.pow(this.denominator, nF.numerator);
+            const newSign = nF.numerator % 2 === 0 ? 1 : this.sign;
+            if (nF.sign < 0) {
+                // Negative exponent => reciprocal
+                return new Fraction({
+                    numerator: Math.pow(this.denominator, nF.numerator),
+                    denominator: Math.pow(this.numerator, nF.numerator),
+                    sign: newSign
+                });
+            }
+            return new Fraction({
+                numerator: newN,
+                denominator: newD,
+                sign: newSign
+            });
+        }
+
+        // Fractional exponent: a^(p/q) = (a^p)^(1/q)
+        const base = this.sign * this.numerator / this.denominator;
+        const expVal = nF.sign * nF.numerator / nF.denominator;
+        const result = Math.pow(base, expVal);
+
+        if (isNaN(result) || !isFinite(result)) {
+            return new Fraction({ numerator: NaN, denominator: NaN });
+        }
+
+        return convertFloatToFraction(result);
+    }
+
+    /**
+     * Returns the modulo (remainder) of the fraction divided by n
+     *
+     * Ex: new Fraction(4.55).mod(0.05) => 0
+     **/
+    mod(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        if (nF.numerator === 0) {
+            throw DivisionByZero();
+        }
+        // a mod b = a - b * floor(a / b)
+        const quotient = this.div(nF);
+        const floorQuotient = quotient.floor();
+        const result = this.sub(nF.mul(floorQuotient));
+        return result;
+    }
+
+    /**
+     * Returns the greatest common divisor of two fractions
+     *
+     * Ex: new Fraction(52).gcd(39) => 13
+     **/
+    gcd(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        // gcd of fractions: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d)
+        const numGcd = gcd(this.numerator, nF.numerator);
+        const denLcm = lcm(this.denominator, nF.denominator);
+        return new Fraction({
+            numerator: numGcd,
+            denominator: denLcm,
+            sign: 1
+        });
+    }
+
+    /**
+     * Returns the least common multiple of two fractions
+     *
+     * Ex: new Fraction(200).lcm(333) => 66600
+     **/
+    lcm(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        // lcm of fractions: lcm(a/b, c/d) = lcm(a, c) / gcd(b, d)
+        const numLcm = lcm(this.numerator, nF.numerator);
+        const denGcd = gcd(this.denominator, nF.denominator);
+        return new Fraction({
+            numerator: numLcm,
+            denominator: denGcd,
+            sign: 1
+        });
+    }
+
+    /**
+     * Returns the ceiling of the fraction
+     *
+     * Ex: new Fraction(0.4).ceil() => 1
+     * Ex: new Fraction(0.23).ceil(2) => 0.23
+     **/
+    ceil(places?: number) {
+        const value = this.sign * this.numerator / this.denominator;
+        if (places !== undefined && places !== null) {
+            const factor = Math.pow(10, places);
+            const rounded = Math.ceil(value * factor) / factor;
+            return convertFloatToFraction(rounded);
+        }
+        return new Fraction(Math.ceil(value));
+    }
+
+    /**
+     * Returns the floor of the fraction
+     *
+     * Ex: new Fraction(0.4).floor() => 0
+     * Ex: new Fraction(0.4).floor(1) => 0.4
+     **/
+    floor(places?: number) {
+        const value = this.sign * this.numerator / this.denominator;
+        if (places !== undefined && places !== null) {
+            const factor = Math.pow(10, places);
+            const rounded = Math.floor(value * factor) / factor;
+            return convertFloatToFraction(rounded);
+        }
+        return new Fraction(Math.floor(value));
+    }
+
+    /**
+     * Returns the rounded value of the fraction
+     *
+     * Ex: new Fraction(10.4).round() => 10
+     * Ex: new Fraction(10.5).round() => 11
+     **/
+    round(places?: number) {
+        const value = this.sign * this.numerator / this.denominator;
+        if (places !== undefined && places !== null) {
+            const factor = Math.pow(10, places);
+            const rounded = Math.round(value * factor) / factor;
+            return convertFloatToFraction(rounded);
+        }
+        return new Fraction(Math.round(value));
+    }
+
+    /**
+     * Checks if two fractions are equal
+     *
+     * Ex: new Fraction(-19.6).equals('-19.6') => true
+     **/
+    equals(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        return this.sign * this.numerator * nF.denominator === nF.sign * nF.numerator * this.denominator;
+    }
+
+    /**
+     * Compares two fractions. Returns -1 if this < a, 0 if equal, 1 if this > a
+     *
+     * Ex: new Fraction(3.5).compare(4.1) => -1
+     **/
+    compare(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        const diff = this.sub(nF);
+        if (diff.numerator === 0) return 0;
+        return diff.sign < 0 ? -1 : 1;
+    }
+
+    /**
+     * Checks if this fraction is divisible by n
+     *
+     * Ex: new Fraction(100.5).divisible('1.5') => true
+     **/
+    divisible(a: number | string | Fraction) {
+        const nF = new Fraction(a);
+        if (nF.numerator === 0) return false;
+        const quotient = this.div(nF);
+        // Check if quotient is an integer
+        return quotient.denominator === 1;
+    }
+
+    /**
+     * Returns the value of the fraction as a number
+     *
+     * Ex: new Fraction(3, 4).valueOf() => 0.75
+     **/
+    valueOf(): number {
+        return this.sign * this.numerator / this.denominator;
+    }
+
+    /**
+     * Returns a LaTeX string representation of the fraction
+     *
+     * Ex: new Fraction(3, 4).toLatex() => "\\frac{3}{4}"
+     **/
+    toLatex(excludeWhole: boolean = false): string {
+        if (this.denominator === 1) {
+            return `${this.sign < 0 ? '-' : ''}${this.numerator}`;
+        }
+        const signStr = this.sign < 0 ? '-' : '';
+        if (!excludeWhole && this.numerator >= this.denominator) {
+            const whole = Math.floor(this.numerator / this.denominator);
+            const remainder = this.numerator % this.denominator;
+            if (remainder === 0) {
+                return `${signStr}${whole}`;
+            }
+            return `${signStr}${whole}\\frac{${remainder}}{${this.denominator}}`;
+        }
+        return `${signStr}\\frac{${this.numerator}}{${this.denominator}}`;
+    }
+
+    /**
+     * Returns a string representation as a fraction
+     *
+     * Ex: new Fraction(3, 4).toFraction() => "3/4"
+     * Ex: new Fraction(71, 23).toFraction(true) => "3 2/23"
+     **/
+    toFraction(excludeWhole: boolean = false): string {
+        const signStr = this.sign < 0 ? '-' : '';
+        if (this.numerator === 0) {
+            return '0';
+        }
+        if (this.denominator === 1) {
+            return `${signStr}${this.numerator}`;
+        }
+        if (!excludeWhole && this.numerator >= this.denominator) {
+            const whole = Math.floor(this.numerator / this.denominator);
+            const remainder = this.numerator % this.denominator;
+            if (remainder === 0) {
+                return `${signStr}${whole}`;
+            }
+            return `${signStr}${whole} ${remainder}/${this.denominator}`;
+        }
+        return `${signStr}${this.numerator}/${this.denominator}`;
+    }
+
+    /**
+     * Returns the continued fraction representation as an array
+     *
+     * Ex: new Fraction(22, 7).toContinued() => [3, 7]
+     **/
+    toContinued(): number[] {
+        let n = this.numerator;
+        let d = this.denominator;
+        const result: number[] = [];
+
+        while (d !== 0) {
+            const whole = Math.floor(n / d);
+            result.push(whole);
+            const remainder = n % d;
+            n = d;
+            d = remainder;
+        }
+
+        return result;
+    }
+
+    /**
+     * Creates a clone of the fraction
+     **/
+    clone(): Fraction {
+        return new Fraction({
+            numerator: this.numerator,
+            denominator: this.denominator,
+            sign: this.sign
+        });
+    }
+
+    /**
+     * Simplifies the fraction (reduces to lowest terms)
+     *
+     * Ex: new Fraction(9, 12).simplify() => 3/4
+     **/
+    simplify(eps?: number): Fraction {
+        return simplify(this);
+    }
+
+    /**
+     * Creates a string representation of a fraction with all digits
+     *
+     * Ex: new Fraction("100.'91823'").toString() => "100.(91823)"
+     **/
     public toString(decimalPlace?: number): string {
         logger.debug('🚑 calling toString()', this);
         decimalPlace = decimalPlace ? decimalPlace : 15;

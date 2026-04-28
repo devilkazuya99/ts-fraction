@@ -86,12 +86,8 @@ export default class Fraction {
      *
      * Ex: new Fraction({n: 2, d: 3}).add("14.9") => 467 / 30
      **/
-    add(a: number | string, b?: number) {
+    add(a: number | string | Fraction, b?: number) {
         const nf = new Fraction(a, b);
-        if (nf.sign < 0) {
-            logger.debug('Forward to sub()');
-            return this.sub(nf.numerator, nf.denominator);
-        }
         // const newSign = this.sign * nf.sign;
         let partN1 = 0;
         let partN2 = 0;
@@ -125,7 +121,7 @@ export default class Fraction {
     *
     * Ex: new Fraction({n: 2, d: 3}).sub("14.9") => -427 / 30
     **/
-    sub(a: number | string, b?: number) {
+    sub(a: number | string | Fraction, b?: number) {
         const nf = new Fraction(a, b);
         let partN1 = 0;
         let partN2 = 0;
@@ -619,6 +615,6 @@ export default class Fraction {
         }
         return str;
 
-    };
+    }
 
 }

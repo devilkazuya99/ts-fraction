@@ -108,7 +108,10 @@ export const isParseData = (x: unknown): x is ParseData => {
     const data = <ParseData>x;
     const hasN = data.hasOwnProperty('numerator') && data.numerator !== undefined && data.numerator !== null;
     const hasD = data.hasOwnProperty('denominator') && data.denominator !== undefined && data.denominator !== null;
-    const r = (hasN && hasD);
+    // Also check that values are actual numbers (not empty strings that slipped through)
+    const validN = typeof data.numerator === 'number' || (typeof data.numerator === 'string' && data.numerator !== '');
+    const validD = typeof data.denominator === 'number' || (typeof data.denominator === 'string' && data.denominator !== '');
+    const r = (hasN && hasD && validN && validD);
     return r;
 };
 

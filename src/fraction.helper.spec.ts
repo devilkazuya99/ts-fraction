@@ -22,13 +22,13 @@ describe('fraction.helper', () => {
         expect(gcd(17345, 1000)).toEqual(5);
     });
 
-    it('convertFloatToFraction', () => {
+    it('convertFloatToFraction 3.142', () => {
         const frc = convertFloatToFraction(3.142);
         logger.debug(frc);
         expect(frc).toEqual(jasmine.objectContaining({ sign: 1, numerator: 1571, denominator: 500 }));
     });
 
-    it('convertFloatToFraction', () => {
+    it('convertFloatToFraction -17.345', () => {
         const frc = convertFloatToFraction(-17.345);
         logger.debug(frc);
         expect(frc).toEqual(jasmine.objectContaining({ sign: -1, numerator: 3469, denominator: 200 }));

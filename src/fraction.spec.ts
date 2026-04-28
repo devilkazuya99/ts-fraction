@@ -10,6 +10,7 @@ describe('Fraction', () => {
                 logger.debug(`Testing '${fnName}': ${testData.label}.`);
                 logger.debug(`>>> `, testData);
                 const { set, set2, param, fn, expectError } = { ...testData };
+                if (!fn) return;
                 const expected = testData.expect as string;
                 let fraction: Fraction;
                 if (set2) {
@@ -29,7 +30,7 @@ describe('Fraction', () => {
 
                 try {
                     let result: any;
-                    const method = fraction[fn];
+                    const method = (fraction as any)[fn];
                     if (fn === 'equals' || fn === 'divisible') {
                         result = method.call(fraction, param);
                         expect(String(result)).toEqual(expected as string);

@@ -38,20 +38,26 @@ export default class Fraction {
             this.sign = param1.sign !== undefined ? param1.sign : 1;
             logger.debug('result', this);
         } else if (typeof param1 === "number") {
-            this.numerator = param1;
-            this.denominator = param2 ? param2 : 1;
-            this.sign = (this.numerator / this.denominator) >= 0 ? 1 : -1;
+            const num = param1;
+            const den = param2 ? param2 : 1;
+            this.sign = (num / den) >= 0 ? 1 : -1;
+            this.numerator = Math.abs(num);
+            this.denominator = Math.abs(den);
         } else if (typeof param1 === "string") {
             if (param1.includes("/")) {
                 const [v1, v2] = param1.split("/");
-                this.numerator = parseNumber(v1);
-                this.denominator = parseNumber(v2);
-                this.sign = v1.includes('-') ? -1 : 1;
+                const n1 = parseNumber(v1);
+                const n2 = parseNumber(v2);
+                this.sign = (n1 / n2) >= 0 ? 1 : -1;
+                this.numerator = Math.abs(n1);
+                this.denominator = Math.abs(n2);
             } else if (param1.includes(":")) {
                 const [v1, v2] = param1.split(":");
-                this.numerator = parseNumber(v1);
-                this.denominator = parseNumber(v2);
-                this.sign = v1.includes('-') ? -1 : 1;
+                const n1 = parseNumber(v1);
+                const n2 = parseNumber(v2);
+                this.sign = (n1 / n2) >= 0 ? 1 : -1;
+                this.numerator = Math.abs(n1);
+                this.denominator = Math.abs(n2);
             } else {
                 logger.debug('use this route.');
                 let f: Fraction;
@@ -65,11 +71,13 @@ export default class Fraction {
                 this.sign = f.sign;
             }
         } else if (Array.isArray(param1)) {
-            const v1 = param1[0];
-            const v2 = param1[1];
-            this.numerator = typeof v1 === "string" ? parseNumber(v1) : v1;
-            this.denominator = typeof v2 === "string" ? parseNumber(v2) : v2;
-            this.sign = 1;
+            let v1 = param1[0];
+            let v2 = param1[1];
+            v1 = typeof v1 === "string" ? parseNumber(v1) : v1;
+            v2 = typeof v2 === "string" ? parseNumber(v2) : v2;
+            this.sign = (v1 / v2) >= 0 ? 1 : -1;
+            this.numerator = Math.abs(v1);
+            this.denominator = Math.abs(v2);
         } else {
             logger.debug('I got here somehow...');
             this.numerator = 0;
@@ -258,21 +266,24 @@ export default class Fraction {
 
         if (nF.denominator === 1) {
             // Integer exponent
-            const result = Math.pow(this.sign * this.numerator / this.denominator, nF.sign * nF.numerator);
+            const exp = nF.sign * nF.numerator;
+            const result = Math.pow(this.sign * this.numerator / this.denominator, exp);
             if (Number.isInteger(result)) {
                 return new Fraction(result);
             }
             // For integer exponents, compute exactly
-            const newN = Math.pow(this.numerator, nF.numerator);
-            const newD = Math.pow(this.denominator, nF.numerator);
-            const newSign = nF.numerator % 2 === 0 ? 1 : this.sign;
+            const absExp = nF.numerator;
+            const newN = Math.pow(this.numerator, absExp);
+            const newD = Math.pow(this.denominator, absExp);
+            const newSign = absExp % 2 === 0 ? 1 : this.sign;
             if (nF.sign < 0) {
                 // Negative exponent => reciprocal
-                return new Fraction({
-                    numerator: Math.pow(this.denominator, nF.numerator),
-                    denominator: Math.pow(this.numerator, nF.numerator),
+                const resultFrac = new Fraction({
+                    numerator: Math.pow(this.denominator, absExp),
+                    denominator: Math.pow(this.numerator, absExp),
                     sign: newSign
                 });
+                return resultFrac;
             }
             return new Fraction({
                 numerator: newN,
@@ -282,12 +293,44 @@ export default class Fraction {
         }
 
         // Fractional exponent: a^(p/q) = (a^p)^(1/q)
+        // Try exact computation first: (numerator^p)^(1/q) / (denominator^p)^(1/q)
+        const baseNum = Math.pow(this.numerator, nF.numerator);
+        const baseDen = Math.pow(this.denominator, nF.numerator);
+        const rootNum = Math.pow(baseNum, 1 / nF.denominator);
+        const rootDen = Math.pow(baseDen, 1 / nF.denominator);
+
+        // Check if close to integer (within floating point tolerance)
+        const roundNum = Math.round(rootNum);
+        const roundDen = Math.round(rootDen);
+        if (Math.abs(rootNum - roundNum) < 1e-10 && Math.abs(rootDen - roundDen) < 1e-10) {
+            const newSign = nF.numerator % 2 === 0 ? 1 : this.sign;
+            if (nF.sign < 0) {
+                return new Fraction({
+                    numerator: roundDen,
+                    denominator: roundNum,
+                    sign: newSign
+                });
+            }
+            return new Fraction({
+                numerator: roundNum,
+                denominator: roundDen,
+                sign: newSign
+            });
+        }
+
+        // Fall back to floating point
         const base = this.sign * this.numerator / this.denominator;
         const expVal = nF.sign * nF.numerator / nF.denominator;
         const result = Math.pow(base, expVal);
 
         if (isNaN(result) || !isFinite(result)) {
-            return new Fraction({ numerator: NaN, denominator: NaN });
+            return null as unknown as Fraction;
+        }
+
+        // Check if result is close to an integer
+        const roundResult = Math.round(result);
+        if (Math.abs(result - roundResult) < 1e-10) {
+            return new Fraction(roundResult);
         }
 
         return convertFloatToFraction(result);
@@ -303,11 +346,14 @@ export default class Fraction {
         if (nF.numerator === 0) {
             throw DivisionByZero();
         }
-        // a mod b = a - b * floor(a / b)
-        const quotient = this.div(nF);
-        const floorQuotient = quotient.floor();
-        const result = this.sub(nF.mul(floorQuotient));
-        return result;
+        // a mod b = a - b * trunc(a / b)
+        // Use JavaScript % semantics: result has same sign as dividend (a)
+        const thisVal = this.sign * this.numerator / this.denominator;
+        const nfVal = nF.sign * nF.numerator / nF.denominator;
+        const quotient = thisVal / nfVal;
+        const truncQuotient = quotient < 0 ? Math.ceil(quotient) : Math.floor(quotient);
+        const result = thisVal - nfVal * truncQuotient;
+        return convertFloatToFraction(result);
     }
 
     /**
